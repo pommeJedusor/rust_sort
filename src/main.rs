@@ -1,3 +1,5 @@
+use std::usize;
+
 use rand::Rng;
 
 fn shuffle(arr: &mut [usize], length: usize) {
@@ -39,6 +41,7 @@ fn bubble_sort(arr: &mut [usize], length: usize) {
 fn merge_sort(arr: &mut [usize], length: usize, mini: Option<usize>, maxi: Option<usize>) {
     let mini = mini.unwrap_or(0);
     let maxi = maxi.unwrap_or(length - 1);
+    assert!(maxi - mini == length - 1);
 
     // manually sort when lenght is lower or equal to two
     if length == 2 && arr[mini] > arr[maxi] {
@@ -75,6 +78,23 @@ fn merge_sort(arr: &mut [usize], length: usize, mini: Option<usize>, maxi: Optio
     return;
 }
 
+fn hash_sort(arr: &mut [usize], length: usize, range: (usize, usize)) {
+    assert!(range.1 > range.0);
+    let mut hashtable = vec![0; range.1 - range.0];
+    for num in &mut *arr {
+        hashtable[*num] += 1;
+    }
+
+    let mut index = 0;
+    for i in range.0..range.1 {
+        for _ in 0..hashtable[i] {
+            assert!(index != length);
+            arr[index] = i;
+            index += 1;
+        }
+    }
+}
+
 fn main() {
     const LENGTH: usize = 8;
 
@@ -88,6 +108,12 @@ fn main() {
     println!("merge sort");
     println!("{:?}", arr);
     merge_sort(&mut arr, LENGTH, None, None);
+    println!("{:?}", arr);
+
+    let mut arr: [usize; LENGTH] = [0; LENGTH].map(|_| rand::thread_rng().gen_range(0..100));
+    println!("hash sort");
+    println!("{:?}", arr);
+    hash_sort(&mut arr, LENGTH, (0, 100));
     println!("{:?}", arr);
 
     let mut arr: [usize; LENGTH] = [0; LENGTH].map(|_| rand::thread_rng().gen_range(0..100));
