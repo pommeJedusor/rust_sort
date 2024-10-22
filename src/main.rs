@@ -89,16 +89,18 @@ fn merge_sort<T: std::cmp::PartialOrd + Clone>(
 
 fn hash_sort(arr: &mut [usize], range: Range<usize>) {
     assert!(range.max > range.min);
-    let mut hashtable = vec![0; range.max - range.min];
+    let range_length = range.max - range.min;
+    let mut hashtable = vec![0; range_length];
     for num in &mut *arr {
-        hashtable[*num] += 1;
+        let index = *num - range.min;
+        hashtable[index] += 1;
     }
 
     let mut index = 0;
-    for i in range.min..range.max {
+    for i in 0..range_length {
         for _ in 0..hashtable[i] {
             assert!(index != arr.len());
-            arr[index] = i;
+            arr[index] = i + range.min;
             index += 1;
         }
     }
@@ -143,6 +145,15 @@ mod tests {
     use super::*;
 
     fn randomize_array(range: Range<i64>, array: &mut [i64]) -> &mut [i64] {
+        let mut rng = rand::thread_rng();
+        for i in 0..array.len() {
+            let random_value = rng.gen_range(range.min..range.max);
+            array[i] = random_value;
+        }
+        return array;
+    }
+
+    fn randomize_array_usize(range: Range<usize>, array: &mut [usize]) -> &mut [usize] {
         let mut rng = rand::thread_rng();
         for i in 0..array.len() {
             let random_value = rng.gen_range(range.min..range.max);
@@ -243,6 +254,40 @@ mod tests {
         let mut input = [0; 1000];
         let input = randomize_array(Range { min: -1000, max: 0 }, &mut input);
         merge_sort(input, None, None);
+        assert!(is_valid(input));
+    }
+
+    #[test]
+    fn hash_sort1() {
+        let mut input = [0; 100];
+        let input = randomize_array_usize(Range { min: 0, max: 100 }, &mut input);
+        hash_sort(input, Range { min: 0, max: 100 });
+        assert!(is_valid(input));
+    }
+    #[test]
+    fn hash_sort2() {
+        let mut input = [0; 1000];
+        let input = randomize_array_usize(Range { min: 0, max: 1000 }, &mut input);
+        hash_sort(input, Range { min: 0, max: 1000 });
+        assert!(is_valid(input));
+    }
+    #[test]
+    fn hash_sort3() {
+        let mut input = [0; 1500];
+        let input = randomize_array_usize(
+            Range {
+                min: 500,
+                max: 2000,
+            },
+            &mut input,
+        );
+        hash_sort(
+            input,
+            Range {
+                min: 500,
+                max: 2000,
+            },
+        );
         assert!(is_valid(input));
     }
 }
